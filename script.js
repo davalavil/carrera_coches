@@ -246,27 +246,28 @@ function createCar(color, x, z) {
     return carMesh;
 }
 
-// --- Reiniciar Juego --- (Coincide con la última imagen: Rojo arriba, Azul abajo, -> Derecha)
+// --- Reiniciar Juego --- (CORREGIDO EL ÁNGULO INICIAL)
 function resetGame() {
     stopGameTimer();
 
     // Posición X común (centro carril izquierdo)
     const startX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2);
 
-    // Separación VERTICAL basada en el LARGO (CAR_LENGTH)
-    const carSeparationZ = CAR_LENGTH / 2 + 0.5;
+    // Separación VERTICAL basada en el ANCHO (CAR_WIDTH)
+    // porque los coches están orientados verticalmente (apuntando -Z)
+    const carSeparationZ = CAR_WIDTH / 2 + 0.5; // Mitad del ancho + espacio
 
     // ASIGNACIÓN DE Z: Rojo (car1) arriba (Z negativo), Azul (car2) abajo (Z positivo)
     const startZ_car1 = 0 - carSeparationZ; // Z NEGATIVA para el coche ROJO (arriba)
     const startZ_car2 = 0 + carSeparationZ; // Z POSITIVA para el coche AZUL (abajo)
 
-    // Ángulo para apuntar a la DERECHA (+X global)
-    const initialAngle = -Math.PI / 2;
+    // Ángulo inicial para apuntar HACIA ARRIBA (-Z global)
+    const initialAngle = 0; // Ángulo 0 se mueve en -Z
 
     // Aplicar a Coche 1 (Rojo)
     if (car1) {
         car1.position.set(startX, 0.5, startZ_car1); // Z NEGATIVA
-        car1.rotation.y = initialAngle;
+        car1.rotation.y = initialAngle; // Apunta hacia ARRIBA
         car1.userData.speed = 0;
         car1.userData.angle = initialAngle;
     }
@@ -274,7 +275,7 @@ function resetGame() {
     // Aplicar a Coche 2 (Azul)
      if (car2) {
         car2.position.set(startX, 0.5, startZ_car2); // Z POSITIVA
-        car2.rotation.y = initialAngle;
+        car2.rotation.y = initialAngle; // Apunta hacia ARRIBA
         car2.userData.speed = 0;
         car2.userData.angle = initialAngle;
     }
