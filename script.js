@@ -234,7 +234,9 @@ function createFigureEightTrack() {
 }
 
 function createCar(color, x, z) {
-    const carGeometry = new THREE.BoxGeometry(CAR_WIDTH, 1, CAR_LENGTH); // Width (X), Height (Y), Length (Z)
+    // La caja se crea con Width (X), Height (Y), Length (Z)
+    // Cuando el coche apunta a la derecha (ángulo -PI/2), su "largo" visual es X y su "ancho" visual es Z.
+    const carGeometry = new THREE.BoxGeometry(CAR_WIDTH, 1, CAR_LENGTH);
     const carMaterial = new THREE.MeshLambertMaterial({ color: color });
     const carMesh = new THREE.Mesh(carGeometry, carMaterial);
     carMesh.castShadow = true;
@@ -246,40 +248,38 @@ function createCar(color, x, z) {
     return carMesh;
 }
 
-// --- Reiniciar Juego --- (VERSIÓN CORREGIDA PARA IMAGEN 2)
+// --- Reiniciar Juego --- (CORREGIDO PARA POSICIÓN VERTICAL INICIAL)
 function resetGame() {
     stopGameTimer();
 
-    // Posición Z común para ambos coches (centrada en la línea)
-    const startZ = 0;
-    // Posición X central de la línea de salida (carril izquierdo)
-    const lineCenterX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2);
+    // Posición X común para ambos coches (centrada en la línea/carril izquierdo)
+    const startX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2);
 
-    // Calcular separación horizontal
-    // Queremos que quepan lado a lado. El ancho total es CAR_LENGTH cuando están girados 90 grados.
-    const carSeparationX = CAR_LENGTH / 2 + 0.5; // Mitad del largo del coche + pequeño espacio
+    // Calcular separación vertical
+    // El "ancho" visual del coche cuando apunta a la derecha es CAR_WIDTH (su dimensión X original)
+    const carSeparationZ = CAR_WIDTH / 2 + 0.5; // Mitad del ancho del coche + pequeño espacio
 
-    // Posición X para cada coche
-    const startX_car1 = lineCenterX - carSeparationX; // Rojo a la izquierda
-    const startX_car2 = lineCenterX + carSeparationX; // Azul a la derecha
+    // Posición Z para cada coche (Rojo abajo, Azul arriba según imagen)
+    // "Abajo" en la vista es Z positivo, "Arriba" es Z negativo
+    const startZ_car1 = 0 + carSeparationZ; // Rojo (car1) con Z positiva
+    const startZ_car2 = 0 - carSeparationZ; // Azul (car2) con Z negativa
 
-    // Ángulo inicial para apuntar a la DERECHA (a lo largo del eje +X global)
-    // El ángulo 0 apunta a lo largo de -Z (según la lógica de movimiento)
-    // Para apuntar a +X, necesitamos rotar -90 grados (-PI/2)
+    // Ángulo inicial para apuntar a la DERECHA (+X)
+    // Nuestra lógica de movimiento usa: 0 -> -Z, PI/2 -> -X, PI -> +Z, -PI/2 -> +X
     const initialAngle = -Math.PI / 2;
 
     // --- Aplicar a Coche 1 (Rojo) ---
-    if (car1) { // Comprobar si ya existe
-        car1.position.set(startX_car1, 0.5, startZ);
-        car1.rotation.y = initialAngle;
+    if (car1) {
+        car1.position.set(startX, 0.5, startZ_car1); // Misma X, Z positiva
+        car1.rotation.y = initialAngle; // Apunta a la derecha
         car1.userData.speed = 0;
         car1.userData.angle = initialAngle;
     }
 
     // --- Aplicar a Coche 2 (Azul) ---
-     if (car2) { // Comprobar si ya existe
-        car2.position.set(startX_car2, 0.5, startZ);
-        car2.rotation.y = initialAngle;
+     if (car2) {
+        car2.position.set(startX, 0.5, startZ_car2); // Misma X, Z negativa
+        car2.rotation.y = initialAngle; // Apunta a la derecha
         car2.userData.speed = 0;
         car2.userData.angle = initialAngle;
     }
@@ -319,19 +319,24 @@ function stopGameTimer() {
 }
 
 function updateTimerDisplay() {
-    if (!gameRunning || startTime === 0) return; // Añadida comprobación startTime
+    if (!gameRunning || startTime === 0) return;
     const currentElapsedTime = performance.now() - startTime;
     const displayElement = document.getElementById('timerDisplay');
-    if (displayElement) { // Comprobar si el elemento existe
+    if (displayElement) {
         displayElement.textContent = `Tiempo: ${(currentElapsedTime / 1000).toFixed(2)}s`;
     }
 }
 
 // --- Actualizar Movimiento del Coche ---
 function updateCarMovement(car, controls) {
-    if (!car) return; // Seguridad por si el coche no se ha creado
+    if (!car) return;
 
     if (!gameRunning && car.userData.speed === 0 && !keysPressed[controls.accelerate] && !keysPressed[controls.brake] && !keysPressed[controls.left] && !keysPressed[controls.right]) {
+         // Aplicar fricción si quedó con velocidad residual
+         if (car.userData.speed !== 0) {
+             car.userData.speed *= FRICTION;
+             if (Math.abs(car.userData.speed) < 0.005) car.userData.speed = 0;
+         }
         return;
     }
 
@@ -354,6 +359,7 @@ function updateCarMovement(car, controls) {
     if (Math.abs(carData.speed) < 0.005) carData.speed = 0;
 
     if (gameRunning && Math.abs(carData.speed) > 0.01) {
+        // NOTA: Izquierda/Derecha se interpreta relativo a la dirección actual del coche
         if (keysPressed[controls.left]) {
             turnInput = TURN_SPEED;
             isTurning = true;
@@ -371,10 +377,13 @@ function updateCarMovement(car, controls) {
     }
 
     if (carData.speed !== 0) {
+        // Calcular movimiento basado en el ángulo actual
+        // Recordar: ángulo 0=-Z, PI/2=-X, PI=+Z, -PI/2=+X
         const deltaX = Math.sin(carData.angle) * carData.speed;
         const deltaZ = Math.cos(carData.angle) * carData.speed;
         const previousPosition = car.position.clone();
 
+        // Aplicar movimiento: restar delta porque ángulo 0 es -Z
         car.position.x -= deltaX;
         car.position.z -= deltaZ;
 
@@ -391,14 +400,12 @@ function updateCarMovement(car, controls) {
         }
 
         const otherCar = (car === car1) ? car2 : car1;
-        // Comprobar si otherCar existe antes de usarlo
         if (otherCar) {
              const otherCarBox = new THREE.Box3().setFromObject(otherCar);
              if (carBox.intersectsBox(otherCarBox)) {
                  collisionCar = true;
              }
         }
-
 
         if (collisionWall) {
             car.position.copy(previousPosition);
