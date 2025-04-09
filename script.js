@@ -211,7 +211,7 @@ function resetGame() {
 
     const startX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2); // Misma X
     // Separación VERTICAL basada en el ANCHO (CAR_WIDTH) porque apuntan hacia arriba/abajo
-    const carSeparationZ = CAR_WIDTH / 2 + 0.5;
+    const carSeparationZ = CAR_WIDTH / 2 + 1.5;
     // Rojo (car1) arriba (Z negativo), Azul (car2) abajo (Z positivo)
     const startZ_car1 = 0 - carSeparationZ;
     const startZ_car2 = 0 + carSeparationZ;
