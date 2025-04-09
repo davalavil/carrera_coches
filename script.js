@@ -205,34 +205,45 @@ function createCar(color, x, z) {
     return carMesh;
 }
 
-// --- Reiniciar Juego --- (Posición vertical, Apuntando ARRIBA)
+// --- Reiniciar Juego --- (CORREGIDO: Paralelo Horizontal, Apuntando ARRIBA)
 function resetGame() {
     stopGameTimer(); // Detiene el temporizador actual si existe
 
-    const startX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2); // Misma X
-    // Separación VERTICAL basada en el ANCHO (CAR_WIDTH) porque apuntan hacia arriba/abajo
-    const carSeparationZ = CAR_WIDTH / 2 + 1.5;
-    // Rojo (car1) arriba (Z negativo), Azul (car2) abajo (Z positivo)
-    const startZ_car1 = 0 - carSeparationZ;
-    const startZ_car2 = 0 + carSeparationZ;
+    // Posición Z común para ambos coches (centrada Z en la línea de salida)
+    const startZ = 0;
+
+    // Calcular la posición X del CENTRO de la línea de salida (carril izquierdo)
+    const lineCenterX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2);
+
+    // Calcular separación HORIZONTAL
+    // Cuando los coches apuntan hacia arriba (ángulo 0), su ANCHO (CAR_WIDTH)
+    // determina cuánto espacio ocupan horizontalmente.
+    const carSeparationX = CAR_WIDTH / 2 + 0.5; // Mitad del ancho + pequeño espacio
+
+    // ASIGNACIÓN DE X: Rojo (car1) a la izquierda, Azul (car2) a la derecha del centro de la línea.
+    const startX_car1 = lineCenterX - carSeparationX; // X menor para el coche ROJO (izquierda)
+    const startX_car2 = lineCenterX + carSeparationX; // X mayor para el coche AZUL (derecha)
+
     // Ángulo inicial para apuntar HACIA ARRIBA (-Z global)
     const initialAngle = 0;
 
-    // Aplicar estado inicial a los coches
-    if (car1) {
-        car1.position.set(startX, 0.5, startZ_car1);
-        car1.rotation.y = initialAngle;
+    // --- Aplicar a Coche 1 (Rojo) ---
+    if (car1) { // Comprobar si ya existe
+        car1.position.set(startX_car1, 0.5, startZ); // X menor, Z común
+        car1.rotation.y = initialAngle; // Apunta hacia ARRIBA
         car1.userData.speed = 0;
         car1.userData.angle = initialAngle;
     }
-    if (car2) {
-        car2.position.set(startX, 0.5, startZ_car2);
-        car2.rotation.y = initialAngle;
+
+    // --- Aplicar a Coche 2 (Azul) ---
+     if (car2) { // Comprobar si ya existe
+        car2.position.set(startX_car2, 0.5, startZ); // X mayor, Z común
+        car2.rotation.y = initialAngle; // Apunta hacia ARRIBA
         car2.userData.speed = 0;
         car2.userData.angle = initialAngle;
     }
 
-    // Limpiar teclas
+    // Limpiar teclas presionadas
     for (const key in keysPressed) {
         keysPressed[key] = false;
     }
