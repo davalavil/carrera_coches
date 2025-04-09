@@ -67,15 +67,9 @@ function init() {
     // *** Crear Pista Figura 8 ***
     createFigureEightTrack();
 
-    // --- Posición inicial de los coches (EN LA LÍNEA DE SALIDA IZQUIERDA) ---
-    // Calcular la posición X de la línea de salida (centro del carril izquierdo)
-    const startX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2);
-    // Calcular posiciones Z iniciales (uno detrás del otro)
-    const startZ_car1 = 0 + CAR_LENGTH; // Coche 1 un poco más adelante
-    const startZ_car2 = 0 - CAR_LENGTH; // Coche 2 un poco más atrás
-
-    car1 = createCar(0xff0000, startX, startZ_car1); // Rojo
-    car2 = createCar(0x0000ff, startX, startZ_car2); // Azul
+    // --- Posición inicial de los coches (definida en resetGame) ---
+    car1 = createCar(0xff0000, 0, 0); // Rojo (posicion inicial se pone en resetGame)
+    car2 = createCar(0x0000ff, 0, 0); // Azul (posicion inicial se pone en resetGame)
     scene.add(car1);
     scene.add(car2);
 
@@ -177,7 +171,7 @@ function createFigureEightTrack() {
 
 
     // 2. Crear los MUROS DE COLISIÓN (invisibles)
-    const wallMaterialInvisible = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }); // Completamente invisible
+    const wallMaterialInvisible = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }); // Completamente invisible y no interfiere con renderizado
     const wallMaterialVisible = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true }); // Para debug (rojo)
     const useVisibleWalls = false; // Poner a true para ver los límites de colisión
     const collisionMaterial = useVisibleWalls ? wallMaterialVisible : wallMaterialInvisible;
@@ -191,47 +185,50 @@ function createFigureEightTrack() {
         trackLimits.push(wallMesh); // Añadir a la lista de colisiones
     }
 
-    // Muros Exteriores (4)
-    createWall(TRACK_OUTER_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, 0, WALL_HEIGHT / 2, halfH); // Arriba
-    createWall(TRACK_OUTER_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, 0, WALL_HEIGHT / 2, -halfH); // Abajo
-    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, TRACK_OUTER_H, halfW, WALL_HEIGHT / 2, 0); // Derecha
-    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, TRACK_OUTER_H, -halfW, WALL_HEIGHT / 2, 0); // Izquierda
+    // Muros Exteriores (4) - Ajustados para estar justo en el borde de la pista visual
+    createWall(TRACK_OUTER_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, 0, WALL_HEIGHT / 2, halfH + COLLISION_WALL_THICKNESS / 2); // Arriba
+    createWall(TRACK_OUTER_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, 0, WALL_HEIGHT / 2, -halfH - COLLISION_WALL_THICKNESS / 2); // Abajo
+    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, TRACK_OUTER_H, halfW + COLLISION_WALL_THICKNESS / 2, WALL_HEIGHT / 2, 0); // Derecha
+    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, TRACK_OUTER_H, -halfW - COLLISION_WALL_THICKNESS / 2, WALL_HEIGHT / 2, 0); // Izquierda
 
-    // Muros del Agujero Izquierdo (4)
+    // Muros del Agujero Izquierdo (4) - Ajustados para estar justo en el borde del agujero
     const holeLeftX = -holeCenterX;
-    createWall(HOLE_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, holeLeftX, WALL_HEIGHT / 2, holeHalfH); // Arriba del hueco izq
-    createWall(HOLE_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, holeLeftX, WALL_HEIGHT / 2, -holeHalfH); // Abajo del hueco izq
-    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, HOLE_H, holeLeftX + holeHalfW, WALL_HEIGHT / 2, 0); // Derecha del hueco izq
-    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, HOLE_H, holeLeftX - holeHalfW, WALL_HEIGHT / 2, 0); // Izquierda del hueco izq
+    createWall(HOLE_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, holeLeftX, WALL_HEIGHT / 2, holeHalfH - COLLISION_WALL_THICKNESS / 2); // Arriba del hueco izq
+    createWall(HOLE_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, holeLeftX, WALL_HEIGHT / 2, -holeHalfH + COLLISION_WALL_THICKNESS / 2); // Abajo del hueco izq
+    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, HOLE_H, holeLeftX + holeHalfW - COLLISION_WALL_THICKNESS / 2, WALL_HEIGHT / 2, 0); // Derecha del hueco izq
+    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, HOLE_H, holeLeftX - holeHalfW + COLLISION_WALL_THICKNESS / 2, WALL_HEIGHT / 2, 0); // Izquierda del hueco izq
 
-    // Muros del Agujero Derecho (4)
+    // Muros del Agujero Derecho (4) - Ajustados para estar justo en el borde del agujero
     const holeRightX = holeCenterX;
-    createWall(HOLE_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, holeRightX, WALL_HEIGHT / 2, holeHalfH); // Arriba del hueco der
-    createWall(HOLE_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, holeRightX, WALL_HEIGHT / 2, -holeHalfH); // Abajo del hueco der
-    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, HOLE_H, holeRightX + holeHalfW, WALL_HEIGHT / 2, 0); // Derecha del hueco der
-    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, HOLE_H, holeRightX - holeHalfW, WALL_HEIGHT / 2, 0); // Izquierda del hueco der
+    createWall(HOLE_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, holeRightX, WALL_HEIGHT / 2, holeHalfH - COLLISION_WALL_THICKNESS / 2); // Arriba del hueco der
+    createWall(HOLE_W, WALL_HEIGHT, COLLISION_WALL_THICKNESS, holeRightX, WALL_HEIGHT / 2, -holeHalfH + COLLISION_WALL_THICKNESS / 2); // Abajo del hueco der
+    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, HOLE_H, holeRightX + holeHalfW - COLLISION_WALL_THICKNESS / 2, WALL_HEIGHT / 2, 0); // Derecha del hueco der
+    createWall(COLLISION_WALL_THICKNESS, WALL_HEIGHT, HOLE_H, holeRightX - holeHalfW + COLLISION_WALL_THICKNESS / 2, WALL_HEIGHT / 2, 0); // Izquierda del hueco der
 
 
     // 3. Crear la LÍNEA DE SALIDA VISUAL (Blanca)
     const startLineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
     // Ancho = Grosor de la pista, Largo = pequeño
-    const startLineGeometry = new THREE.PlaneGeometry(TRACK_THICKNESS * 0.8, 2); // Un poco menos ancha que la pista
+    const startLineGeometry = new THREE.PlaneGeometry(TRACK_THICKNESS * 0.9, 2); // Un poco menos ancha que la pista
     const startLineMesh = new THREE.Mesh(startLineGeometry, startLineMaterial);
     startLineMesh.rotation.x = -Math.PI / 2; // Plana en el suelo
     startLineMesh.rotation.z = Math.PI / 2; // Girarla para que sea horizontal
     // Posición: en el centro X del carril izquierdo, en Z = 0
-    startLineMesh.position.set(-(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2), 0.1, 0); // En X del carril izq, Z=0, Y un poco elevado
+    startLineMesh.position.set(-(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2), 0.05, 0); // En X del carril izq, Z=0, Y un poquito elevado
     startLineMesh.name = "startLine";
     scene.add(startLineMesh);
 }
 
 
-// --- Crear Coche (Sin cambios) ---
+// --- Crear Coche ---
 function createCar(color, x, z) {
     const carGeometry = new THREE.BoxGeometry(CAR_WIDTH, 1, CAR_LENGTH);
     const carMaterial = new THREE.MeshLambertMaterial({ color: color });
     const carMesh = new THREE.Mesh(carGeometry, carMaterial);
-    carMesh.position.set(x, 0.5, z);
+    // Sombras (opcional)
+    carMesh.castShadow = true;
+    carMesh.receiveShadow = false;
+    carMesh.position.set(x, 0.5, z); // Posicion Y base
     carMesh.userData = {
         speed: 0,
         angle: 0 // Ángulo inicial se establecerá en resetGame
@@ -240,23 +237,29 @@ function createCar(color, x, z) {
     return carMesh;
 }
 
-// --- Reiniciar Juego ---
+// --- Reiniciar Juego --- (CON LA NUEVA POSICIÓN INICIAL)
 function resetGame() {
     stopGameTimer(); // Detiene y limpia el temporizador anterior
 
-    // Reposicionar coches en la línea de salida IZQUIERDA, apuntando hacia ARRIBA (-Z)
+    // Calcular la posición X de la línea de salida (centro del carril izquierdo)
     const startX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2);
-    const startZ_car1 = 0 + CAR_LENGTH / 2 + 1; // Coche 1 justo delante de la línea
-    const startZ_car2 = 0 - CAR_LENGTH / 2 - 1; // Coche 2 justo detrás de la línea
 
-    // Ángulo para ir hacia arriba (-Z) desde la izquierda
-    const initialAngle = Math.PI / 2;
+    // Calcular posiciones Z iniciales para estar LADO A LADO
+    // Centrados verticalmente (Z=0) en la línea de salida
+    const carSpacing = CAR_WIDTH * 0.6; // Pequeño espacio entre ellos
+    const startZ_car1 = 0 + carSpacing; // Coche 1 (Rojo) un poco arriba
+    const startZ_car2 = 0 - carSpacing; // Coche 2 (Azul) un poco abajo
 
+    // Ángulo inicial para apuntar hacia la DERECHA (+X)
+    const initialAngle = 0; // 0 radianes es hacia +X
+
+    // --- Aplicar a Coche 1 (Rojo) ---
     car1.position.set(startX, 0.5, startZ_car1);
     car1.rotation.y = initialAngle;
     car1.userData.speed = 0;
     car1.userData.angle = initialAngle;
 
+    // --- Aplicar a Coche 2 (Azul) ---
     car2.position.set(startX, 0.5, startZ_car2);
     car2.rotation.y = initialAngle;
     car2.userData.speed = 0;
@@ -266,7 +269,7 @@ function resetGame() {
     for (const key in keysPressed) {
         keysPressed[key] = false;
     }
-    // No iniciar el temporizador aquí, se inicia con el primer movimiento
+    // El temporizador se inicia con el primer movimiento (en handleKeyDown)
 }
 
 // --- Funciones del Temporizador ---
@@ -288,9 +291,12 @@ function stopGameTimer() {
         clearInterval(timerInterval);
         timerInterval = null;
     }
-     // Podrías querer mostrar el tiempo final aquí o dejarlo como está
-     document.getElementById('timerDisplay').textContent = `Tiempo: ${(elapsedTime / 1000).toFixed(2)}s`;
-
+    // Muestra el tiempo final si ya había empezado
+    if (elapsedTime > 0) {
+        document.getElementById('timerDisplay').textContent = `Tiempo: ${(elapsedTime / 1000).toFixed(2)}s`;
+    } else {
+        document.getElementById('timerDisplay').textContent = `Tiempo: 0.00s`; // Asegura mostrar 0.00 si no empezó
+    }
 }
 
 function updateTimerDisplay() {
@@ -302,11 +308,11 @@ function updateTimerDisplay() {
 }
 
 
-// --- Actualizar Movimiento del Coche (Lógica sin cambios) ---
+// --- Actualizar Movimiento del Coche ---
 function updateCarMovement(car, controls) {
-    if (!gameRunning && car.userData.speed === 0 && !Object.values(keysPressed).some(k => k)) {
-       // No hacer nada si el juego no ha empezado y no se está moviendo/pulsando tecla
-       // return; // Cuidado: esto podría impedir el primer movimiento
+    // Si el juego no ha empezado y no hay input de movimiento, no actualizar velocidad/angulo
+    if (!gameRunning && car.userData.speed === 0 && !keysPressed[controls.accelerate] && !keysPressed[controls.brake] && !keysPressed[controls.left] && !keysPressed[controls.right]) {
+       return;
     }
 
     const carData = car.userData;
@@ -316,71 +322,84 @@ function updateCarMovement(car, controls) {
     // Aceleración y Freno
     if (keysPressed[controls.accelerate]) accelerationInput = ACCELERATION;
     if (keysPressed[controls.brake]) {
-        if (carData.speed > 0.01) accelerationInput = -BRAKE_FORCE;
-        else if (carData.speed > -MAX_SPEED / 2) accelerationInput = -ACCELERATION / 1.5;
+        if (carData.speed > 0.01) accelerationInput = -BRAKE_FORCE; // Freno normal
+        else if (carData.speed > -MAX_SPEED / 2) accelerationInput = -ACCELERATION / 1.5; // Reversa más lenta
     }
 
-    // Solo aplicar aceleración si el juego está activo
-    if (gameRunning || accelerationInput !== 0) {
-         carData.speed += accelerationInput;
+    // Aplicar aceleración solo si hay input o ya tiene velocidad (para que la fricción actúe)
+    if (accelerationInput !== 0 || carData.speed !== 0) {
+       carData.speed += accelerationInput;
+       carData.speed *= FRICTION; // Aplicar fricción después de acelerar/frenar
     }
 
-    carData.speed *= FRICTION;
+    // Limitar velocidad y detener si es muy baja
     carData.speed = Math.max(-MAX_SPEED / 2, Math.min(MAX_SPEED, carData.speed));
     if (Math.abs(carData.speed) < 0.005) carData.speed = 0;
 
-    // Giro (Solo si hay velocidad y el juego está activo)
-     if (gameRunning && Math.abs(carData.speed) > 0.01) {
+    // Giro (Solo si hay velocidad y se está pulsando tecla de giro)
+    if (Math.abs(carData.speed) > 0.01) {
         if (keysPressed[controls.left]) turnInput = TURN_SPEED;
         if (keysPressed[controls.right]) turnInput = -TURN_SPEED;
-        if (carData.speed < 0) turnInput *= -1;
+        if (carData.speed < 0) turnInput *= -1; // Invertir giro en reversa
     }
 
-    carData.angle += turnInput;
-    car.rotation.y = carData.angle;
+    // Aplicar giro
+    if (turnInput !== 0) {
+        carData.angle += turnInput;
+        car.rotation.y = carData.angle;
+    }
 
-    // Actualizar Posición
-    const deltaX = Math.sin(carData.angle) * carData.speed;
-    const deltaZ = Math.cos(carData.angle) * carData.speed;
-    const previousPosition = car.position.clone();
-    car.position.x -= deltaX;
-    car.position.z -= deltaZ;
+    // Actualizar Posición si hay velocidad
+    if (carData.speed !== 0) {
+        const deltaX = Math.sin(carData.angle) * carData.speed;
+        const deltaZ = Math.cos(carData.angle) * carData.speed;
+        const previousPosition = car.position.clone();
+        car.position.x -= deltaX;
+        car.position.z -= deltaZ;
 
-    // --- Detección de Colisiones ---
-    const carBox = new THREE.Box3().setFromObject(car);
-    let collision = false;
+        // --- Detección de Colisiones ---
+        const carBox = new THREE.Box3().setFromObject(car);
+        let collisionWall = false;
+        let collisionCar = false;
 
-    // Colisión con límites de la pista (exteriores e interiores de los agujeros)
-    for (const limit of trackLimits) {
-        // Es importante que los muros de colisión tengan un Box3 asociado
-        // THREE.Box3().setFromObject(limit) funciona bien si limit es un Mesh
-        const limitBox = new THREE.Box3().setFromObject(limit);
-        if (carBox.intersectsBox(limitBox)) {
-            collision = true;
-            break;
+        // Colisión con límites de la pista (muros)
+        for (const limit of trackLimits) {
+            const limitBox = new THREE.Box3().setFromObject(limit);
+            if (carBox.intersectsBox(limitBox)) {
+                collisionWall = true;
+                break;
+            }
         }
-    }
 
-    // Colisión entre coches
-    const otherCar = (car === car1) ? car2 : car1;
-    const otherCarBox = new THREE.Box3().setFromObject(otherCar);
-    if (carBox.intersectsBox(otherCarBox)) {
-        collision = true;
-        // Simple "rebote" o frenado al chocar entre ellos
-         carData.speed *= -0.1; // Pequeño rebote inverso
-         otherCar.userData.speed *= -0.1;
-    }
+        // Colisión entre coches
+        const otherCar = (car === car1) ? car2 : car1;
+        const otherCarBox = new THREE.Box3().setFromObject(otherCar);
+        if (carBox.intersectsBox(otherCarBox)) {
+            collisionCar = true;
+        }
 
-    // Revertir si hay colisión con muros
-    if (collision && !carBox.intersectsBox(otherCarBox)) { // Solo revertir por muros
-        car.position.copy(previousPosition);
-        carData.speed *= 0.1; // Frenazo
-        if (Math.abs(carData.speed) < 0.01) carData.speed = 0;
-    } else if (collision && carBox.intersectsBox(otherCarBox)) {
-        // Si choca con otro coche, no revertimos posición completamente, dejamos el rebote
-         car.position.x -= deltaX * -0.5; // Permitir un pequeño ajuste por el rebote
-         car.position.z -= deltaZ * -0.5;
-    }
+        // --- Respuesta a Colisiones ---
+        if (collisionWall) {
+            car.position.copy(previousPosition); // Revertir completamente al chocar con muro
+            carData.speed *= -0.2; // Rebote y frenazo fuerte
+            // Evitar que se quede pegado rebotando a velocidad muy baja
+            if(Math.abs(carData.speed) < 0.05) carData.speed = 0;
+
+        } else if (collisionCar) {
+            // Si choca con otro coche, aplicar un "empujón" basado en la velocidad relativa (simplificado)
+            // Revertir un poco la posición para evitar que se atraviesen demasiado
+            car.position.copy(previousPosition);
+             // Reducir velocidad y posible cambio de dirección leve (más complejo de hacer realista)
+            carData.speed *= 0.5; // Frenar bastante al chocar
+
+             // Empujar ligeramente al otro coche (muy simplificado)
+             // Esto es difícil de hacer bien sin física más compleja
+             // const pushFactor = 0.05;
+             // otherCar.position.x -= deltaX * pushFactor;
+             // otherCar.position.z -= deltaZ * pushFactor;
+
+        }
+    } // Fin de if (carData.speed !== 0)
 }
 
 
@@ -392,9 +411,7 @@ function animate() {
     updateCarMovement(car1, { accelerate: 'w', brake: 's', left: 'a', right: 'd' });
     updateCarMovement(car2, { accelerate: 'ArrowUp', brake: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' });
 
-    // El temporizador se actualiza mediante setInterval ahora, no es necesario aquí
-    // updateTimerDisplay(); // Opcional: podrías llamarlo aquí para máxima precisión visual si quitas el setInterval
-
+    // El temporizador se actualiza mediante setInterval
     renderer.render(scene, camera);
 }
 
