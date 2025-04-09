@@ -246,7 +246,7 @@ function createCar(color, x, z) {
     return carMesh;
 }
 
-// --- Reiniciar Juego --- (INTENTO FINAL CON Z INVERTIDAS)
+// --- Reiniciar Juego --- (Coincide con la última imagen: Rojo arriba, Azul abajo, -> Derecha)
 function resetGame() {
     stopGameTimer();
 
@@ -256,18 +256,16 @@ function resetGame() {
     // Separación VERTICAL basada en el LARGO (CAR_LENGTH)
     const carSeparationZ = CAR_LENGTH / 2 + 0.5;
 
-    // *** INVERTIMOS LA ASIGNACIÓN DE Z ***
-    // Según la imagen: Rojo (car1) abajo (Z positivo), Azul (car2) arriba (Z negativo)
-    // Probamos la asignación contraria por si la vista invierte Z
-    const startZ_car1 = 0 - carSeparationZ; // Rojo (car1) con Z NEGATIVA (arriba)
-    const startZ_car2 = 0 + carSeparationZ; // Azul (car2) con Z POSITIVA (abajo)
+    // ASIGNACIÓN DE Z: Rojo (car1) arriba (Z negativo), Azul (car2) abajo (Z positivo)
+    const startZ_car1 = 0 - carSeparationZ; // Z NEGATIVA para el coche ROJO (arriba)
+    const startZ_car2 = 0 + carSeparationZ; // Z POSITIVA para el coche AZUL (abajo)
 
     // Ángulo para apuntar a la DERECHA (+X global)
     const initialAngle = -Math.PI / 2;
 
     // Aplicar a Coche 1 (Rojo)
     if (car1) {
-        car1.position.set(startX, 0.5, startZ_car1); // Misma X, Z NEGATIVA
+        car1.position.set(startX, 0.5, startZ_car1); // Z NEGATIVA
         car1.rotation.y = initialAngle;
         car1.userData.speed = 0;
         car1.userData.angle = initialAngle;
@@ -275,7 +273,7 @@ function resetGame() {
 
     // Aplicar a Coche 2 (Azul)
      if (car2) {
-        car2.position.set(startX, 0.5, startZ_car2); // Misma X, Z POSITIVA
+        car2.position.set(startX, 0.5, startZ_car2); // Z POSITIVA
         car2.rotation.y = initialAngle;
         car2.userData.speed = 0;
         car2.userData.angle = initialAngle;
