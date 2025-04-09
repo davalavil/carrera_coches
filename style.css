@@ -31,6 +31,14 @@ body {
     border-radius: 8px;
      /* El fondo lo da el contenedor o la escena */
 }
+/* Estilo para el temporizador (puedes ajustar) */
+#timerDisplay {
+    color: #FFD700; /* Color dorado */
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
 button {
     font-family: 'Press Start 2P', cursive;
     background-color: #4CAF50;
