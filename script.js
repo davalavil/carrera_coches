@@ -274,7 +274,7 @@ function resetGame() {
 
     // Aplicar a Coche 2 (Azul)
      if (car2) {
-        car2.position.set(startX, 6.5, startZ_car2); // Z POSITIVA
+        car2.position.set(startX, 0.5, startZ_car2); // Z POSITIVA
         car2.rotation.y = initialAngle; // Apunta hacia ARRIBA
         car2.userData.speed = 0;
         car2.userData.angle = initialAngle;
