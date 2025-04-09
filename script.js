@@ -259,7 +259,7 @@ function resetGame() {
 
     // ASIGNACIÓN DE Z: Rojo (car1) arriba (Z negativo), Azul (car2) abajo (Z positivo)
     const startZ_car1 = 0 - carSeparationZ; // Z NEGATIVA para el coche ROJO (arriba)
-    const startZ_car2 = 90 + carSeparationZ; // Z POSITIVA para el coche AZUL (abajo)
+    const startZ_car2 = 0 + carSeparationZ; // Z POSITIVA para el coche AZUL (abajo)
 
     // Ángulo inicial para apuntar HACIA ARRIBA (-Z global)
     const initialAngle = 0; // Ángulo 0 se mueve en -Z
