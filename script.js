@@ -262,7 +262,7 @@ function resetGame() {
     const startZ_car2 = 0 + carSeparationZ; // Z POSITIVA para el coche AZUL (abajo)
 
     // Ángulo inicial para apuntar HACIA ARRIBA (-Z global)
-    const initialAngle = 0; // Ángulo 0 se mueve en -Z
+    const initialAngle = 90; // Ángulo 0 se mueve en -Z
 
     // Aplicar a Coche 1 (Rojo)
     if (car1) {
