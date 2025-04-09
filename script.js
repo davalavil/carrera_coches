@@ -255,7 +255,7 @@ function resetGame() {
 
     // Separación VERTICAL basada en el ANCHO (CAR_WIDTH)
     // porque los coches están orientados verticalmente (apuntando -Z)
-    const carSeparationZ = CAR_WIDTH / 2 + 1.5; // Mitad del ancho + espacio
+    const carSeparationZ = CAR_WIDTH / 2 + 0.5; // Mitad del ancho + espacio
 
     // ASIGNACIÓN DE Z: Rojo (car1) arriba (Z negativo), Azul (car2) abajo (Z positivo)
     const startZ_car1 = 0 - carSeparationZ; // Z NEGATIVA para el coche ROJO (arriba)
