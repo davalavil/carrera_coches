@@ -9,8 +9,8 @@ let gameRunning = false;
 let timerInterval = null;
 
 // --- Constantes ---
-const CAR_WIDTH = 2;
-const CAR_LENGTH = 4;
+const CAR_WIDTH = 2;    // Ancho del coche (Dimensión X local)
+const CAR_LENGTH = 4;   // Largo del coche (Dimensión Z local)
 const MAX_SPEED = 0.50;
 const ACCELERATION = 0.020;
 const BRAKE_FORCE = 0.035;
@@ -234,8 +234,7 @@ function createFigureEightTrack() {
 }
 
 function createCar(color, x, z) {
-    // La caja se crea con Width (X), Height (Y), Length (Z)
-    // Cuando el coche apunta a la derecha (ángulo -PI/2), su "largo" visual es X y su "ancho" visual es Z.
+    // Width (X), Height (Y), Length (Z) local del coche
     const carGeometry = new THREE.BoxGeometry(CAR_WIDTH, 1, CAR_LENGTH);
     const carMaterial = new THREE.MeshLambertMaterial({ color: color });
     const carMesh = new THREE.Mesh(carGeometry, carMaterial);
@@ -248,25 +247,24 @@ function createCar(color, x, z) {
     return carMesh;
 }
 
-// --- Reiniciar Juego --- (CORREGIDO PARA POSICIÓN VERTICAL INICIAL)
+// --- Reiniciar Juego --- (AHORA SÍ, AJUSTADO A LA ÚLTIMA IMAGEN)
 function resetGame() {
     stopGameTimer();
 
     // Posición X común para ambos coches (centrada en la línea/carril izquierdo)
     const startX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2);
 
-    // Calcular separación vertical
-    // El "ancho" visual del coche cuando apunta a la derecha es CAR_WIDTH (su dimensión X original)
-    const carSeparationZ = CAR_WIDTH / 2 + 0.5; // Mitad del ancho del coche + pequeño espacio
+    // Calcular separación VERTICAL basada en el LARGO del coche (CAR_LENGTH)
+    // porque los coches están girados 90 grados.
+    const carSeparationZ = CAR_LENGTH / 2 + 0.5; // Mitad del largo + espacio
 
     // Posición Z para cada coche (Rojo abajo, Azul arriba según imagen)
-    // "Abajo" en la vista es Z positivo, "Arriba" es Z negativo
-    const startZ_car1 = 0 + carSeparationZ; // Rojo (car1) con Z positiva
-    const startZ_car2 = 0 - carSeparationZ; // Azul (car2) con Z negativa
+    // Z positivo es "abajo" en la vista, Z negativo es "arriba"
+    const startZ_car1 = 0 + carSeparationZ; // Rojo (car1) con Z positiva (abajo)
+    const startZ_car2 = 0 - carSeparationZ; // Azul (car2) con Z negativa (arriba)
 
-    // Ángulo inicial para apuntar a la DERECHA (+X)
-    // Nuestra lógica de movimiento usa: 0 -> -Z, PI/2 -> -X, PI -> +Z, -PI/2 -> +X
-    const initialAngle = -Math.PI / 2;
+    // Ángulo inicial para apuntar a la DERECHA (+X global)
+    const initialAngle = -Math.PI / 2; // -90 grados
 
     // --- Aplicar a Coche 1 (Rojo) ---
     if (car1) {
@@ -332,7 +330,6 @@ function updateCarMovement(car, controls) {
     if (!car) return;
 
     if (!gameRunning && car.userData.speed === 0 && !keysPressed[controls.accelerate] && !keysPressed[controls.brake] && !keysPressed[controls.left] && !keysPressed[controls.right]) {
-         // Aplicar fricción si quedó con velocidad residual
          if (car.userData.speed !== 0) {
              car.userData.speed *= FRICTION;
              if (Math.abs(car.userData.speed) < 0.005) car.userData.speed = 0;
@@ -359,7 +356,6 @@ function updateCarMovement(car, controls) {
     if (Math.abs(carData.speed) < 0.005) carData.speed = 0;
 
     if (gameRunning && Math.abs(carData.speed) > 0.01) {
-        // NOTA: Izquierda/Derecha se interpreta relativo a la dirección actual del coche
         if (keysPressed[controls.left]) {
             turnInput = TURN_SPEED;
             isTurning = true;
@@ -377,13 +373,10 @@ function updateCarMovement(car, controls) {
     }
 
     if (carData.speed !== 0) {
-        // Calcular movimiento basado en el ángulo actual
-        // Recordar: ángulo 0=-Z, PI/2=-X, PI=+Z, -PI/2=+X
         const deltaX = Math.sin(carData.angle) * carData.speed;
         const deltaZ = Math.cos(carData.angle) * carData.speed;
         const previousPosition = car.position.clone();
 
-        // Aplicar movimiento: restar delta porque ángulo 0 es -Z
         car.position.x -= deltaX;
         car.position.z -= deltaZ;
 
