@@ -234,7 +234,6 @@ function createFigureEightTrack() {
 }
 
 function createCar(color, x, z) {
-    // Width (X), Height (Y), Length (Z) local del coche
     const carGeometry = new THREE.BoxGeometry(CAR_WIDTH, 1, CAR_LENGTH);
     const carMaterial = new THREE.MeshLambertMaterial({ color: color });
     const carMesh = new THREE.Mesh(carGeometry, carMaterial);
@@ -247,42 +246,42 @@ function createCar(color, x, z) {
     return carMesh;
 }
 
-// --- Reiniciar Juego --- (AHORA SÍ, AJUSTADO A LA ÚLTIMA IMAGEN)
+// --- Reiniciar Juego --- (INTENTO FINAL CON Z INVERTIDAS)
 function resetGame() {
     stopGameTimer();
 
-    // Posición X común para ambos coches (centrada en la línea/carril izquierdo)
+    // Posición X común (centro carril izquierdo)
     const startX = -(TRACK_OUTER_W / 2 - TRACK_THICKNESS / 2);
 
-    // Calcular separación VERTICAL basada en el LARGO del coche (CAR_LENGTH)
-    // porque los coches están girados 90 grados.
-    const carSeparationZ = CAR_LENGTH / 2 + 0.5; // Mitad del largo + espacio
+    // Separación VERTICAL basada en el LARGO (CAR_LENGTH)
+    const carSeparationZ = CAR_LENGTH / 2 + 0.5;
 
-    // Posición Z para cada coche (Rojo abajo, Azul arriba según imagen)
-    // Z positivo es "abajo" en la vista, Z negativo es "arriba"
-    const startZ_car1 = 0 + carSeparationZ; // Rojo (car1) con Z positiva (abajo)
-    const startZ_car2 = 0 - carSeparationZ; // Azul (car2) con Z negativa (arriba)
+    // *** INVERTIMOS LA ASIGNACIÓN DE Z ***
+    // Según la imagen: Rojo (car1) abajo (Z positivo), Azul (car2) arriba (Z negativo)
+    // Probamos la asignación contraria por si la vista invierte Z
+    const startZ_car1 = 0 - carSeparationZ; // Rojo (car1) con Z NEGATIVA (arriba)
+    const startZ_car2 = 0 + carSeparationZ; // Azul (car2) con Z POSITIVA (abajo)
 
-    // Ángulo inicial para apuntar a la DERECHA (+X global)
-    const initialAngle = -Math.PI / 2; // -90 grados
+    // Ángulo para apuntar a la DERECHA (+X global)
+    const initialAngle = -Math.PI / 2;
 
-    // --- Aplicar a Coche 1 (Rojo) ---
+    // Aplicar a Coche 1 (Rojo)
     if (car1) {
-        car1.position.set(startX, 0.5, startZ_car1); // Misma X, Z positiva
-        car1.rotation.y = initialAngle; // Apunta a la derecha
+        car1.position.set(startX, 0.5, startZ_car1); // Misma X, Z NEGATIVA
+        car1.rotation.y = initialAngle;
         car1.userData.speed = 0;
         car1.userData.angle = initialAngle;
     }
 
-    // --- Aplicar a Coche 2 (Azul) ---
+    // Aplicar a Coche 2 (Azul)
      if (car2) {
-        car2.position.set(startX, 0.5, startZ_car2); // Misma X, Z negativa
-        car2.rotation.y = initialAngle; // Apunta a la derecha
+        car2.position.set(startX, 0.5, startZ_car2); // Misma X, Z POSITIVA
+        car2.rotation.y = initialAngle;
         car2.userData.speed = 0;
         car2.userData.angle = initialAngle;
     }
 
-    // Limpiar teclas presionadas
+    // Limpiar teclas
     for (const key in keysPressed) {
         keysPressed[key] = false;
     }
