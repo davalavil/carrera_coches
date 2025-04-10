@@ -24,7 +24,7 @@ const TRACK_THICKNESS = 18;
 const HOLE_H = TRACK_OUTER_H - (2 * TRACK_THICKNESS);
 const HOLE_W = (TRACK_OUTER_W - (3 * TRACK_THICKNESS)) / 2;
 const WALL_HEIGHT = 2;
-const COLLISION_WALL_THICKNESS = 0.1;
+const COLLISION_WALL_THICKNESS = 0.0;
 
 // --- Inicialización ---
 function init() {
