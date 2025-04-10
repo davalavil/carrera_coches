@@ -18,8 +18,8 @@ const FRICTION = 0.97;
 const TURN_SPEED = 0.055;
 
 // --- Dimensiones PISTA FIGURA 8 ---
-const TRACK_OUTER_W = 100;
-const TRACK_OUTER_H = 130;
+const TRACK_OUTER_W = 130;
+const TRACK_OUTER_H = 100;
 const TRACK_THICKNESS = 18;
 const HOLE_H = TRACK_OUTER_H - (2 * TRACK_THICKNESS);
 const HOLE_W = (TRACK_OUTER_W - (3 * TRACK_THICKNESS)) / 2;
